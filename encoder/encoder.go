@@ -3,8 +3,9 @@ package encoder
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/md5"
 	"crypto/rand"
-	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -39,8 +40,16 @@ func EncryptFile(f string, password string, remove bool) (newFileName string, er
 }
 
 func generateKey(masterPassword string) []byte {
-	key := sha256.Sum256([]byte(masterPassword))
-	return key[:]
+
+	hash := func(input string) string {
+		byteInput := []byte(input)
+		md5Hash := md5.Sum(byteInput)
+		return hex.EncodeToString(md5Hash[:]) // by referring to it as a string
+	}
+
+	//key := sha256.Sum256([]byte(masterPassword))
+	key := hash(masterPassword)
+	return []byte(key)
 }
 
 func encrypt(body []byte, masterPassword string) ([]byte, error) {
